@@ -1,6 +1,4 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 
 function Title() {
@@ -11,7 +9,10 @@ function Header(props) {
   return (
     <div className="input-block">
       <div className="input-wrapper">
-        <input placeholder='Введите задачу' className="input" onChange={(event) => props.onChangeInput(event.target.value)}></input>
+        <input 
+          placeholder='Введите задачу' 
+          className="input" 
+          onChange={(event) => props.onChangeInput(event.target.value)}></input>
       </div>
       <div className="button-wrapper">
         <button className="button" onClick={props.data}>Add task</button>
@@ -27,8 +28,12 @@ function Task(props) {
       <div className={props.completed2 ? "output-item checked" : "output-item"}>
         <div className="description">{props.output}</div>
         <div className="buttons">
-          <input className="btn-complete" onClick={props.changeCheckbox} type={props.completed2 ? 'checkbox checked' : 'checkbox'}/>
-          <button className="btn-delete"  onClick="taskDelete(${index})">Delete</button>
+          <input 
+            id={props.id2}
+            className="btn-complete" 
+            onClick={props.changeCheckbox} 
+            type= 'checkbox'/>
+          <button className="btn-delete" id={props.id2} onClick={props.changeDelete}>Delete</button>
         </div>
       </div>
    
@@ -45,7 +50,9 @@ function List(props) {
             key={el.id}
             output={el.taskName}
             completed2={el.completed}
-            changeCheckbox={() => props.changeCheckbox2(el.id)}
+            changeCheckbox={props.changeCheckbox}
+            id2={el.id}
+            changeDelete={props.changeDelete}
           />
         )}
     </div>
@@ -71,8 +78,27 @@ function App() {
     setListTasks(listTasks.concat(obj));
   }
 
-  function handleCheckbox(id) {
-    setListTasks()
+  function handleCheckbox(event) {
+    const taskId = Number(event.target.id);
+    const listTaskesCompleted = listTasks.map((el) => el.id === taskId ? {
+                                                                            taskName: el.taskName,
+                                                                            completed: !el.completed,
+                                                                            id: el.id,
+                                                                          } : el); 
+    // setListTasks(listTaskesCompleted);
+    filterTasks(listTaskesCompleted);
+  }
+
+  function handleCheckboxDelete(event) {
+    const taskId = Number(event.target.id);
+    const listTaskesDelete = listTasks.filter((el) => el.id !== taskId);
+    setListTasks(listTaskesDelete);
+  }
+
+  function filterTasks(tasks) {
+    const openTasks = tasks.filter((el) => el.completed === true);
+    const closeTask = tasks.filter((el) => !el.completed);
+    setListTasks([...closeTask, ...openTasks]); 
   }
 
   return (
@@ -81,9 +107,11 @@ function App() {
       <Header onChangeInput={handleChange} data={handleTask}/>
       <h2>Tasks for the day</h2>
       {/* <Task output={taskText}/> */}
-      <List tasks={listTasks} changeCheckbox2={handleCheckbox}/>
+      <List tasks={listTasks} changeCheckbox={handleCheckbox} changeDelete={handleCheckboxDelete}/>
     </div>
   )
 }
+
+
 
 export default App
